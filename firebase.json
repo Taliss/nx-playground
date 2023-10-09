@@ -20,7 +20,9 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "firebase-debug.log",
+      "firebase-debug.*.log"
     ],
     "rewrites": [
       {
