@@ -40,5 +40,6 @@ Thumbs.db
 
 # Firebase stuffs
 .firebase
+firebase-debug.log
 ui-debug.log
 ui-debug.*.log
