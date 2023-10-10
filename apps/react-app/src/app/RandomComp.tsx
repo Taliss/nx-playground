@@ -9,6 +9,7 @@ import firebaseApp from '../../firebaseApp';
 const functions = getFunctions(firebaseApp);
 connectFunctionsEmulator(functions, 'localhost', 5001);
 const getHelloWorld = httpsCallable(functions, 'helloWorld');
+const slimShady = httpsCallable(functions, 'slimShady');
 
 type HelloWorldData = {
   foo: 'string';
@@ -18,7 +19,7 @@ type HelloWorldData = {
 export default function RandomComp() {
   const [data, setData] = useState<HelloWorldData | null>(null);
   useEffect(() => {
-    getHelloWorld()
+    slimShady()
       .then((result) => {
         const reqData = result.data;
         setData(reqData as HelloWorldData);
@@ -33,10 +34,32 @@ export default function RandomComp() {
   }
 
   return (
-    <h2>
-      <span>FOO: {data.foo}</span>
-      <span>BAR: {data.bar}</span>
-      <span>BAZ: {data.baz}</span>
-    </h2>
+    <div>
+      <div>
+        <div>Battery-A</div>
+        <div>Battery-B</div>
+      </div>
+
+      <div>
+        <div>
+          <h3>Consumer-A</h3>
+          <button
+            style={{ width: 100, height: 40 }}
+            onClick={() => console.log('connecting consumer-A')}
+          >
+            Connect
+          </button>
+        </div>
+        <div>
+          <h3>Consumer-B</h3>
+          <button
+            style={{ width: 100, height: 40 }}
+            onClick={() => console.log('connecting consumer-B')}
+          >
+            Connect
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

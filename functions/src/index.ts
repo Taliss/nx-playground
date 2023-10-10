@@ -22,3 +22,8 @@ export const helloWorld = onCall((request) => {
     baz: 'baz',
   };
 });
+
+export const slimShady = onCall((request) => {
+  console.log('Huuarei', request.data);
+  return 'party';
+});
