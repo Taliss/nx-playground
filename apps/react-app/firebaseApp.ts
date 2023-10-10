@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase/app';
+import 'firebase/firestore';
 
 const firebaseApp = initializeApp({
   // Why I even need projectId for local run ?!?

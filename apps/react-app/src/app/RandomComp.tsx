@@ -7,9 +7,11 @@ import { useEffect, useState } from 'react';
 import firebaseApp from '../../firebaseApp';
 
 const functions = getFunctions(firebaseApp);
-connectFunctionsEmulator(functions, 'localhost', 5001);
-const getHelloWorld = httpsCallable(functions, 'helloWorld');
-const slimShady = httpsCallable(functions, 'slimShady');
+console.log(import.meta.env);
+if (import.meta.env.MODE !== 'production' && import.meta.env.PROD !== true) {
+  connectFunctionsEmulator(functions, 'localhost', 5001);
+}
+const slimShady = httpsCallable(functions, 'connectConsumer');
 
 type HelloWorldData = {
   foo: 'string';
@@ -22,6 +24,7 @@ export default function RandomComp() {
     slimShady()
       .then((result) => {
         const reqData = result.data;
+        console.log(result, ' ?!?');
         setData(reqData as HelloWorldData);
       })
       .catch((err) => {

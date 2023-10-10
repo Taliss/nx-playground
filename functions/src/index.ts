@@ -7,23 +7,18 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-import * as logger from 'firebase-functions/logger';
+import { initializeApp } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 import { onCall } from 'firebase-functions/v2/https';
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+initializeApp();
+const db = getFirestore();
 
-export const helloWorld = onCall((request) => {
-  const { data } = request;
-  logger.info(data, { structuredData: true });
-  return {
-    foo: 'foo',
-    bar: 'bar',
-    baz: 'baz',
-  };
-});
+type ConnectConsumer = { powerSupplyId: string; consumerId: string };
 
-export const slimShady = onCall((request) => {
-  console.log('Huuarei', request.data);
-  return 'party';
+export const connectConsumer = onCall<ConnectConsumer, unknown>((request) => {
+  // const { powerSupplyId, consumerId } = request.data;
+  return db.listCollections().then((collections) => {
+    return collections.map(({ id }) => id);
+  });
 });
