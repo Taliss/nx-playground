@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import 'firebase/firestore';
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 
 const firebaseApp = initializeApp({
@@ -10,9 +11,10 @@ const firebaseApp = initializeApp({
   // authDomain: '### FIREBASE AUTH DOMAIN ###',
 });
 
-const functions = getFunctions(firebaseApp);
+export const functions = getFunctions(firebaseApp);
+export const db = getFirestore();
+
 if (import.meta.env.MODE !== 'production' && import.meta.env.PROD !== true) {
   connectFunctionsEmulator(functions, 'localhost', 5001);
+  connectFirestoreEmulator(db, 'localhost', 8080);
 }
-
-export default functions;

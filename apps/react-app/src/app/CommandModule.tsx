@@ -1,5 +1,5 @@
 import { httpsCallable } from 'firebase/functions';
-import functions from '../../firebaseFunctions';
+import { functions } from '../../firebaseUtils';
 import CommandButton from './CommandButton';
 
 const connectConsumer = httpsCallable<unknown, string>(

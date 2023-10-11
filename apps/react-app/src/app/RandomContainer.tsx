@@ -1,25 +1,27 @@
 import { useEffect, useState } from 'react';
 
 import { httpsCallable } from 'firebase/functions';
-import functions from '../../firebaseFunctions';
-import Battery from './Battery';
+import { functions } from '../../firebaseUtils';
 import CommandModule from './CommandModule';
 import Consumer from './Consumer';
+import PowerModule from './PowerModule';
 
 const getAll = httpsCallable(functions, 'getAllModules');
 
+export type PowerModule = {
+  id: string;
+  voltage: number;
+  name: string;
+  draining: boolean;
+};
+type ConsumerModule = {
+  id: string;
+  amper: number;
+  name: string;
+};
 type SatelliteModules = {
-  powerModules: Array<{
-    id: string;
-    voltage: number;
-    name: string;
-    draining: boolean;
-  }>;
-  consumerModules: Array<{
-    id: string;
-    amper: number;
-    name: string;
-  }>;
+  powerModules: PowerModule[];
+  consumerModules: ConsumerModule[];
 };
 
 export default function RandomContainer() {
@@ -44,11 +46,7 @@ export default function RandomContainer() {
       <div>
         <div style={{ display: 'grid', gridTemplateColumns: '50% 50%' }}>
           {modules.powerModules.map((pModule) => (
-            <Battery
-              key={pModule.id}
-              name={pModule.name}
-              voltage={pModule.voltage}
-            />
+            <PowerModule key={pModule.id} id={pModule.id} />
           ))}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '50% 50%' }}>

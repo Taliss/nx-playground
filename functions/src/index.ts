@@ -23,6 +23,7 @@ export const connectConsumer = onCall<ConnectionInfo, Promise<string>>(
       .collection('power-modules')
       .doc(powerSupplyId);
 
+    console.log((await powerSupplyRef.get()).data());
     await powerSupplyRef.update({ draining: true });
     return `Power Module with id: ${powerSupplyId} is now in use!`;
   }
