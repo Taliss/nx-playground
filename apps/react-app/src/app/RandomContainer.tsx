@@ -54,7 +54,10 @@ export default function RandomContainer() {
         </div>
       </div>
       <CommandModule
-        connections={modules.powerModules.map(({ draining }) => draining)}
+        powerModules={modules.powerModules.map(({ draining, id }) => ({
+          draining,
+          powerSupplyId: id,
+        }))}
       />
     </div>
   );
