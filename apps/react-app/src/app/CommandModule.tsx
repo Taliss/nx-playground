@@ -26,7 +26,10 @@ export default function CommandModule({
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '50% 50%' }}>
       {powerModules.map(({ powerSupplyId, draining }) => (
-        <CommandButton onClickHandler={handleOnClick(powerSupplyId, draining)}>
+        <CommandButton
+          key={powerSupplyId}
+          onClickHandler={handleOnClick(powerSupplyId, draining)}
+        >
           {draining ? 'Disconnect' : 'Connect'}
         </CommandButton>
       ))}

@@ -44,12 +44,20 @@ export default function RandomContainer() {
       <div>
         <div style={{ display: 'grid', gridTemplateColumns: '50% 50%' }}>
           {modules.powerModules.map((pModule) => (
-            <Battery name={pModule.name} voltage={pModule.voltage} />
+            <Battery
+              key={pModule.id}
+              name={pModule.name}
+              voltage={pModule.voltage}
+            />
           ))}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '50% 50%' }}>
           {modules.consumerModules.map((cModule) => (
-            <Consumer name={cModule.name} amper={cModule.amper} />
+            <Consumer
+              key={cModule.id}
+              name={cModule.name}
+              amper={cModule.amper}
+            />
           ))}
         </div>
       </div>
