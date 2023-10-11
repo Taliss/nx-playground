@@ -1,7 +1,7 @@
 import { doc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { db } from '../../firebaseUtils';
-import { PowerModule as PowerModuleProps } from './RandomContainer';
+import { PowerModuleProps } from './RandomContainer';
 
 type NoIdPowerModule = Omit<PowerModuleProps, 'id'>;
 export default function PowerModule({ id }: { id: string }) {
@@ -18,7 +18,7 @@ export default function PowerModule({ id }: { id: string }) {
       {powerModule && (
         <>
           <h4>{powerModule.name}</h4>
-          <span>{powerModule.voltage}V</span>
+          <span>{powerModule.voltage.toFixed(1)}V</span>
         </>
       )}
     </div>
