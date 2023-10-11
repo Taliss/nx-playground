@@ -14,18 +14,29 @@ import { onCall } from 'firebase-functions/v2/https';
 initializeApp();
 const firestore = getFirestore();
 
-type ConnectConsumer = { powerSupplyId: string; consumerId: string };
+type ConnectionInfo = { powerSupplyId: string; consumerId: string };
 
-export const connectConsumer = onCall<ConnectConsumer, unknown>(
+export const connectConsumer = onCall<ConnectionInfo, Promise<string>>(
   async (request) => {
     const { powerSupplyId } = request.data;
-
     const powerSupplyRef = firestore
       .collection('power-modules')
       .doc(powerSupplyId);
 
     await powerSupplyRef.update({ draining: true });
-    return `Power Module with id:${powerSupplyId} is now in use`;
+    return `Power Module with id: ${powerSupplyId} is now in use!`;
+  }
+);
+
+export const disconnectConsumer = onCall<ConnectionInfo, Promise<string>>(
+  async (request) => {
+    const { powerSupplyId } = request.data;
+    const powerSupplyRef = firestore
+      .collection('power-modules')
+      .doc(powerSupplyId);
+
+    await powerSupplyRef.update({ draining: false });
+    return `Power Module with id: ${powerSupplyId} is now charging!`;
   }
 );
 
