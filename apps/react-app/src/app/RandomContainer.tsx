@@ -1,20 +1,11 @@
 import { useEffect, useState } from 'react';
 
-import {
-  connectFunctionsEmulator,
-  getFunctions,
-  httpsCallable,
-} from 'firebase/functions';
-import firebaseApp from '../../firebaseApp';
+import { httpsCallable } from 'firebase/functions';
+import functions from '../../firebaseFunctions';
 import Battery from './Battery';
 import CommandModule from './CommandModule';
 import Consumer from './Consumer';
 
-const functions = getFunctions(firebaseApp);
-console.log(import.meta.env);
-if (import.meta.env.MODE !== 'production' && import.meta.env.PROD !== true) {
-  connectFunctionsEmulator(functions, 'localhost', 5001);
-}
 const getAll = httpsCallable(functions, 'getAllModules');
 
 type SatelliteModules = {

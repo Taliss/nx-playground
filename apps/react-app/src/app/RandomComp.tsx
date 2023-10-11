@@ -1,16 +1,7 @@
-import {
-  connectFunctionsEmulator,
-  getFunctions,
-  httpsCallable,
-} from 'firebase/functions';
+import { httpsCallable } from 'firebase/functions';
 import { useEffect, useState } from 'react';
-import firebaseApp from '../../firebaseApp';
+import functions from '../../firebaseFunctions';
 
-const functions = getFunctions(firebaseApp);
-console.log(import.meta.env);
-if (import.meta.env.MODE !== 'production' && import.meta.env.PROD !== true) {
-  connectFunctionsEmulator(functions, 'localhost', 5001);
-}
 const slimShady = httpsCallable(functions, 'connectConsumer');
 const getAll = httpsCallable(functions, 'getAllModules');
 

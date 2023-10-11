@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import 'firebase/firestore';
+import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 
 const firebaseApp = initializeApp({
   // Why I even need projectId for local run ?!?
@@ -9,4 +10,9 @@ const firebaseApp = initializeApp({
   // authDomain: '### FIREBASE AUTH DOMAIN ###',
 });
 
-export default firebaseApp;
+const functions = getFunctions(firebaseApp);
+if (import.meta.env.MODE !== 'production' && import.meta.env.PROD !== true) {
+  connectFunctionsEmulator(functions, 'localhost', 5001);
+}
+
+export default functions;
