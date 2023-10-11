@@ -16,6 +16,7 @@ const firestore = getFirestore();
 
 type ConnectionInfo = { powerSupplyId: string; consumerId: string };
 
+// gRPC my old friend
 export const connectConsumer = onCall<ConnectionInfo, Promise<string>>(
   async (request) => {
     const { powerSupplyId } = request.data;
@@ -64,3 +65,6 @@ export const getAllModules = onCall(async (req) => {
     })),
   };
 });
+
+// Background triggered functions.
+// No field level triggers, extreme caution required to not end up with infinite loop ( seems like a big limitation to me... )

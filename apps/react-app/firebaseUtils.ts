@@ -16,5 +16,6 @@ export const db = getFirestore();
 
 if (import.meta.env.MODE !== 'production' && import.meta.env.PROD !== true) {
   connectFunctionsEmulator(functions, 'localhost', 5001);
+  // TODO: why client sdk needs this, but server sdk does not need it ??
   connectFirestoreEmulator(db, 'localhost', 8080);
 }
