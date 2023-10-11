@@ -12,6 +12,7 @@ if (import.meta.env.MODE !== 'production' && import.meta.env.PROD !== true) {
   connectFunctionsEmulator(functions, 'localhost', 5001);
 }
 const slimShady = httpsCallable(functions, 'connectConsumer');
+const getAll = httpsCallable(functions, 'getAllModules');
 
 type HelloWorldData = {
   foo: 'string';
@@ -21,7 +22,7 @@ type HelloWorldData = {
 export default function RandomComp() {
   const [data, setData] = useState<HelloWorldData | null>(null);
   useEffect(() => {
-    slimShady()
+    getAll()
       .then((result) => {
         const reqData = result.data;
         console.log(result, ' ?!?');
