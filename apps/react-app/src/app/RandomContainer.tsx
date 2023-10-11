@@ -19,11 +19,13 @@ const getAll = httpsCallable(functions, 'getAllModules');
 
 type SatelliteModules = {
   powerModules: Array<{
+    id: string;
     voltage: number;
     name: string;
     draining: boolean;
   }>;
   consumerModules: Array<{
+    id: string;
     amper: number;
     name: string;
   }>;

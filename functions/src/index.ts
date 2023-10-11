@@ -42,7 +42,13 @@ export const getAllModules = onCall(async (req) => {
   ]);
 
   return {
-    powerModules: documentSnapshots[0].map((snapshot) => snapshot.data()),
-    consumerModules: documentSnapshots[1].map((snapshot) => snapshot.data()),
+    powerModules: documentSnapshots[0].map((snapshot) => ({
+      id: snapshot.id,
+      ...snapshot.data(),
+    })),
+    consumerModules: documentSnapshots[1].map((snapshot) => ({
+      id: snapshot.id,
+      ...snapshot.data(),
+    })),
   };
 });
