@@ -60,8 +60,8 @@ const updateStatsContinuously = async (
     tickInterval = 1000,
   }: { mode: 'drain' | 'charge'; tickInterval?: number }
 ) => {
-  const intervalId = setInterval(async () => {
-    await firestore.runTransaction(async (t) => {
+  const intervalId = setInterval(() => {
+    firestore.runTransaction(async (t) => {
       const [moduleDoc, statsDoc] = await t.getAll(moduleRef, statsRef);
 
       // Validations
@@ -83,22 +83,24 @@ const updateStatsContinuously = async (
         voltage: number;
       };
 
-      // Validate only on voltage in order to not mess up with JS and floating point numbers!
+      const newVoltage = mode === 'drain' ? voltage - 3 : voltage + 3;
+      // I don't want to add extra library  for precision, but in reallity I'll do it
+      const newAmper = parseFloat(
+        (mode === 'drain' ? amper + 0.4 : amper - 0.4).toFixed(10)
+      );
+
+      // Validate only on voltage in order to not deal with JS and floating point numbers!
       // Tick steps are proportional on purpose!
-      if (voltage >= 30 || voltage <= 0) {
+      if (newVoltage > 30 || newVoltage < 0) {
         clearInterval(intervalId);
         return;
       }
-      // End of validaitons. Apply transaction updates below
-
-      const newVoltage = mode === 'drain' ? voltage - 3 : voltage + 3;
-      const newAmper = mode === 'drain' ? amper + 0.4 : amper - 0.4;
 
       t.update(statsRef, {
         voltage: newVoltage,
         amper: newAmper,
       });
-      console.log(`${mode} tick applied!`);
+      console.log(`${mode} tick applied to ${moduleDoc.id} module pair!`);
     });
   }, tickInterval);
 };
@@ -106,9 +108,6 @@ const updateStatsContinuously = async (
 export const updateStats = onDocumentUpdated(
   'power-payload-module/{id}',
   async (event) => {
-    console.log('Previous: ', event.data?.before.data());
-    console.log('Current: ', event.data?.after.data());
-
     const moduleRef = firestore
       .collection('power-payload-module')
       .doc(event.params.id);
