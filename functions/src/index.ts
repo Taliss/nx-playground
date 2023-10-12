@@ -9,6 +9,7 @@
 
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { onCall } from 'firebase-functions/v2/https';
 
 initializeApp();
@@ -109,3 +110,32 @@ export const getAllModules2 = onCall(async (req) => {
     })),
   };
 });
+
+export const updateStats = onDocumentUpdated(
+  'power-payload-module/{id}',
+  async (event) => {
+    console.log('Previous: ', event.data?.before.data());
+    console.log('Current: ', event.data?.after.data());
+
+    // const pModuleRef = firestore
+    //   .collection('power-modules')
+    //   .doc(event.params.batteryId);
+    // const cModuleRef = firestore
+    //   .collection('consumer-modules')
+    //   .doc(event.data?.after.data().consumerId);
+
+    // // connection established, start pumping consumtion
+    // if (event.data?.after.data().draining === true) {
+    //   console.log('Connection established: Power draining started.');
+    //   setTimeout(async () => {
+    //     await updatePowerModulesTransaction(pModuleRef, cModuleRef, 'drain');
+    //   }, 1000);
+    //   console.log('After transaction !');
+    // } else {
+    //   console.log('Connection lost: Power charging started.');
+    //   // await updatePowerModulesTransaction(pModuleRef, cModuleRef, 'charge');
+    // }
+
+    return null;
+  }
+);
