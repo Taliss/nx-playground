@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../../firebaseUtils';
-import CommandModule from './CommandModule';
+import CommandButton from './CommandButton';
 import Consumer from './ConsumerModule';
 import PowerModule from './PowerModule';
 
@@ -55,12 +55,11 @@ export default function RandomContainer() {
           ))}
         </div>
       </div>
-      <CommandModule
-        powerModules={modules.powerModules.map(({ draining, id }) => ({
-          draining,
-          powerSupplyId: id,
-        }))}
-      />
+      <div style={{ display: 'grid', gridTemplateColumns: '50% 50%' }}>
+        {modules.powerModules.map(({ id }) => (
+          <CommandButton key={id} powerSupplyId={id} />
+        ))}
+      </div>
     </div>
   );
 }
