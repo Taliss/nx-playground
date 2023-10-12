@@ -1,4 +1,4 @@
-import RandomContainer from './RandomContainer';
+import Wrapper from './NewVersion/Wrapper';
 
 /*
  * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -421,7 +421,9 @@ export function NxWelcome({ title }: { title: string }) {
           <div id="welcome">
             <h1>Welcome</h1>
           </div>
-          <RandomContainer />
+          <Wrapper />
+
+          {/* <RandomContainer /> */}
           {/* <div id="hero" className="rounded">
             <div className="text-container">
               <h2>

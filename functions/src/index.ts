@@ -66,5 +66,46 @@ export const getAllModules = onCall(async (req) => {
   };
 });
 
-// Background triggered functions.
-// No field level triggers, extreme caution required to not end up with infinite loop ( seems like a big limitation to me... )
+export const connect = onCall<{ id: string }, Promise<string>>(
+  async (request) => {
+    const { id } = request.data;
+    const docRef = firestore.collection('power-payload-module').doc(id);
+
+    await docRef.update({ inUse: true });
+    return `Power Module with id: ${id} is now in use!`;
+  }
+);
+
+export const disconnect = onCall<{ id: string }, Promise<string>>(
+  async (request) => {
+    const { id } = request.data;
+    const powerSupplyRef = firestore.collection('power-payload-module').doc(id);
+
+    await powerSupplyRef.update({ inUse: false });
+    return `Power Module with id: ${id} is now charging!`;
+  }
+);
+
+export const getAllModules2 = onCall(async (req) => {
+  const documentRefs = await Promise.all(
+    ['power-payload-module', 'stats'].map((coll) =>
+      firestore.collection(coll).listDocuments()
+    )
+  );
+
+  const documentSnapshots = await Promise.all([
+    firestore.getAll(...documentRefs[0]),
+    firestore.getAll(...documentRefs[1]),
+  ]);
+
+  return {
+    modules: documentSnapshots[0].map((snapshot) => ({
+      id: snapshot.id,
+      ...snapshot.data(),
+    })),
+    stats: documentSnapshots[1].map((snapshot) => ({
+      id: snapshot.id,
+      ...snapshot.data(),
+    })),
+  };
+});
