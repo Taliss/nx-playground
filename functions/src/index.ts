@@ -1,72 +1,12 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
 import { initializeApp } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { DocumentReference, getFirestore } from 'firebase-admin/firestore';
 import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { onCall } from 'firebase-functions/v2/https';
 
 initializeApp();
 const firestore = getFirestore();
 
-type ConnectionInfo = { powerSupplyId: string; consumerId: string };
-
 // gRPC my old friend
-export const connectConsumer = onCall<ConnectionInfo, Promise<string>>(
-  async (request) => {
-    const { powerSupplyId } = request.data;
-    const powerSupplyRef = firestore
-      .collection('power-modules')
-      .doc(powerSupplyId);
-
-    console.log((await powerSupplyRef.get()).data());
-    await powerSupplyRef.update({ draining: true });
-    return `Power Module with id: ${powerSupplyId} is now in use!`;
-  }
-);
-
-export const disconnectConsumer = onCall<ConnectionInfo, Promise<string>>(
-  async (request) => {
-    const { powerSupplyId } = request.data;
-    const powerSupplyRef = firestore
-      .collection('power-modules')
-      .doc(powerSupplyId);
-
-    await powerSupplyRef.update({ draining: false });
-    return `Power Module with id: ${powerSupplyId} is now charging!`;
-  }
-);
-
-export const getAllModules = onCall(async (req) => {
-  const documentRefs = await Promise.all(
-    ['power-modules', 'consumer-modules'].map((coll) =>
-      firestore.collection(coll).listDocuments()
-    )
-  );
-
-  const documentSnapshots = await Promise.all([
-    firestore.getAll(...documentRefs[0]),
-    firestore.getAll(...documentRefs[1]),
-  ]);
-
-  return {
-    powerModules: documentSnapshots[0].map((snapshot) => ({
-      id: snapshot.id,
-      ...snapshot.data(),
-    })),
-    consumerModules: documentSnapshots[1].map((snapshot) => ({
-      id: snapshot.id,
-      ...snapshot.data(),
-    })),
-  };
-});
-
 export const connect = onCall<{ id: string }, Promise<string>>(
   async (request) => {
     const { id } = request.data;
@@ -87,7 +27,7 @@ export const disconnect = onCall<{ id: string }, Promise<string>>(
   }
 );
 
-export const getAllModules2 = onCall(async (req) => {
+export const getAllModules = onCall(async (req) => {
   const documentRefs = await Promise.all(
     ['power-payload-module', 'stats'].map((coll) =>
       firestore.collection(coll).listDocuments()
@@ -111,31 +51,79 @@ export const getAllModules2 = onCall(async (req) => {
   };
 });
 
+const updateStatsContinuously = async (
+  moduleRef: DocumentReference,
+  statsRef: DocumentReference,
+  innitialInUseState: boolean,
+  {
+    mode,
+    tickInterval = 1000,
+  }: { mode: 'drain' | 'charge'; tickInterval?: number }
+) => {
+  const intervalId = setInterval(async () => {
+    await firestore.runTransaction(async (t) => {
+      const [moduleDoc, statsDoc] = await t.getAll(moduleRef, statsRef);
+
+      // Validations
+      if (!moduleDoc.exists || !statsDoc.exists) {
+        throw new Error('One of the docs does not exist');
+      }
+
+      // Check if the status of the connection when the trigger function was invoked
+      // is different than the one at the current iteration of the transaction.
+      // If so, we clean interVal and do not apply changes
+      if (!!moduleDoc.data()?.inUse !== innitialInUseState) {
+        clearTimeout(intervalId);
+        return;
+      }
+
+      // TODO: I need to dig in the dog on how to use TS with this library. Unfortunately no examples for now.
+      const { voltage, amper } = statsDoc.data() as {
+        amper: number;
+        voltage: number;
+      };
+
+      // Validate only on voltage in order to not mess up with JS and floating point numbers!
+      // Tick steps are proportional on purpose!
+      if (voltage >= 30 || voltage <= 0) {
+        clearInterval(intervalId);
+        return;
+      }
+      // End of validaitons. Apply transaction updates below
+
+      const newVoltage = mode === 'drain' ? voltage - 3 : voltage + 3;
+      const newAmper = mode === 'drain' ? amper + 0.4 : amper - 0.4;
+
+      t.update(statsRef, {
+        voltage: newVoltage,
+        amper: newAmper,
+      });
+      console.log(`${mode} tick applied!`);
+    });
+  }, tickInterval);
+};
+
 export const updateStats = onDocumentUpdated(
   'power-payload-module/{id}',
   async (event) => {
     console.log('Previous: ', event.data?.before.data());
     console.log('Current: ', event.data?.after.data());
 
-    // const pModuleRef = firestore
-    //   .collection('power-modules')
-    //   .doc(event.params.batteryId);
-    // const cModuleRef = firestore
-    //   .collection('consumer-modules')
-    //   .doc(event.data?.after.data().consumerId);
+    const moduleRef = firestore
+      .collection('power-payload-module')
+      .doc(event.params.id);
+    const statsRef = firestore
+      .collection('stats')
+      .doc(event.data?.after.data().statsId);
 
-    // // connection established, start pumping consumtion
-    // if (event.data?.after.data().draining === true) {
-    //   console.log('Connection established: Power draining started.');
-    //   setTimeout(async () => {
-    //     await updatePowerModulesTransaction(pModuleRef, cModuleRef, 'drain');
-    //   }, 1000);
-    //   console.log('After transaction !');
-    // } else {
-    //   console.log('Connection lost: Power charging started.');
-    //   // await updatePowerModulesTransaction(pModuleRef, cModuleRef, 'charge');
-    // }
-
-    return null;
+    // fire and forget
+    updateStatsContinuously(
+      moduleRef,
+      statsRef,
+      event.data?.after.data().inUse,
+      {
+        mode: event.data?.after.data().inUse === true ? 'drain' : 'charge',
+      }
+    );
   }
 );

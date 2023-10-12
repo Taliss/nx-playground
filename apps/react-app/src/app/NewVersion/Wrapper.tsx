@@ -5,7 +5,7 @@ import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '../../../firebaseUtils';
 import Button from './Button';
 
-const getAll2 = httpsCallable(functions, 'getAllModules2');
+const getAll2 = httpsCallable(functions, 'getAllModules');
 
 export type PowerConsumerModuleProps = {
   id: string;
@@ -87,7 +87,9 @@ export default function RandomContainer() {
         {satteliteData.modules.map(({ id }) => (
           <div key={id}>
             <h4>{liveModules[id].batteryName}</h4>
-            <span>{liveStats[liveModules[id].statsId].voltage}V</span>
+            <span>
+              {liveStats[liveModules[id].statsId].voltage.toFixed(2)}V
+            </span>
           </div>
         ))}
       </div>
@@ -95,7 +97,7 @@ export default function RandomContainer() {
         {satteliteData.modules.map(({ id }) => (
           <div key={id}>
             <h4>{liveModules[id].consumerName}</h4>
-            <span>{liveStats[liveModules[id].statsId].amper}V</span>
+            <span>{liveStats[liveModules[id].statsId].amper.toFixed(2)}A</span>
           </div>
         ))}
       </div>
