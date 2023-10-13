@@ -61,6 +61,7 @@ const updateStatsContinuously = async (
   }: { mode: 'drain' | 'charge'; tickInterval?: number }
 ) => {
   const intervalId = setInterval(() => {
+    // fire and forget
     firestore.runTransaction(async (t) => {
       const [moduleDoc, statsDoc] = await t.getAll(moduleRef, statsRef);
 
